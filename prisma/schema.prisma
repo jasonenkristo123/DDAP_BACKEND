@@ -25,6 +25,7 @@ model templates {
   due_days    Int
   created_at  DateTime? @db.Timestamp(6)
   updated_at  DateTime? @db.Timestamp(6)
+  priority    priority?
 }
 
 model todos {
@@ -37,14 +38,15 @@ model todos {
   status      status?   @default(ToDo)
   created_at  DateTime? @db.Timestamp(6)
   done_at     DateTime? @db.Timestamp(6)
+  due_date    DateTime? @db.Timestamp(6)
   users       users?    @relation(fields: [id_user], references: [id_user], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model users {
   id_user           BigInt              @id @default(autoincrement())
-  profilePhotoUrl   String?             @map("profile_photo")  @default("https://wallpapersok.com/images/thumbnail/cute-cat-eyes-profile-picture-uq3edzmg1guze2hh.webp")
+  profilePhotoUrl   String?             @default("https://wallpapersok.com/images/thumbnail/cute-cat-eyes-profile-picture-uq3edzmg1guze2hh.webp") @map("profile_photo")
   displayName       String              @map("display_name") @db.VarChar(50)
-  username          String              @map("username") @unique @db.VarChar(50)
+  username          String              @unique @map("username") @db.VarChar(50)
   pronouns          String?             @map("pronouns") @db.VarChar(20)
   bio               String?             @map("bio") @db.VarChar(100)
   email             String?             @map("email") @db.VarChar(40)
@@ -64,7 +66,6 @@ model users_achievement {
   achievements   achievements? @relation(fields: [id_achievement], references: [id_achievement], onDelete: NoAction, onUpdate: NoAction)
   users          users?        @relation(fields: [id_user], references: [id_user], onDelete: NoAction, onUpdate: NoAction)
 }
-
 
 enum category {
   College
@@ -89,4 +90,10 @@ enum status {
   ToDo
   In_Progress @map("In Progress")
   Done
+}
+
+enum TodoStatus {
+  TODO
+  IN_PROGRESS
+  DONE
 }
