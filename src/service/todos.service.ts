@@ -4,6 +4,7 @@ import type {
   GetTodosParams,
   UpdateTodoDTO,
 } from "../types/todos.type.js";
+import { achievementService } from "./achievements.service.js";
 
 export const todoService = {
   getTodos: async (params: GetTodosParams) => {
@@ -11,7 +12,13 @@ export const todoService = {
   },
 
   createTodo: async (userId: number, data: CreateTodoDTO) => {
-    return await todoRepository.createTodo(BigInt(userId), data);
+    const newTodo = await todoRepository.createTodo(BigInt(userId), data);
+    
+    achievementService.checkAndUnlockTodoMilestones(userId).catch((err) => {
+      console.error("Error checking todo achievements:", err);
+    });
+
+    return newTodo;
   },
 
   updateTodo: async (todoId: number, userId: number, data: UpdateTodoDTO) => {
@@ -24,17 +31,17 @@ export const todoService = {
       throw new Error("Todo tidak di temukan");
     }
 
-    const finalUpdateData: any = {...data};
+    const finalUpdateData: any = { ...data };
 
     if (data.due_date) {
       finalUpdateData.due_date = new Date(data.due_date);
     }
 
     if (data.status) {
-      if (data.status === 'Done' && existingTodo.status !== 'Done') {
+      if (data.status === "Done" && existingTodo.status !== "Done") {
         finalUpdateData.done_at = new Date();
-      } else if (data.status !== 'Done' && existingTodo.status === 'Done') {
-        finalUpdateData.done_at = null
+      } else if (data.status !== "Done" && existingTodo.status === "Done") {
+        finalUpdateData.done_at = null;
       }
     }
 
@@ -43,5 +50,5 @@ export const todoService = {
 
   deleteTodo: async (todoId: number) => {
     return await todoRepository.deleteTodo(todoId);
-  }
+  },
 };

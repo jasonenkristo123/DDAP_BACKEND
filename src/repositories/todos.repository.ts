@@ -7,7 +7,7 @@ import type {
 
 export const todoRepository = {
   getTodos: async (params: GetTodosParams) => {
-    const { userId, page, limit, sortBy, order, category } = params;
+    const { userId, page, limit, sortBy, order, category, search } = params;
 
     const skip = (page - 1) * limit;
 
@@ -17,6 +17,13 @@ export const todoRepository = {
 
     if (category && category.toLocaleLowerCase() !== "all") {
       whereClause.category = category;
+    }
+
+    if (search && search.trim() !== "") {
+      whereClause.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+      ];
     }
 
     const orderByClause: any = {};

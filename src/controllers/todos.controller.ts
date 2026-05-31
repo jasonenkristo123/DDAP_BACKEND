@@ -1,14 +1,37 @@
 import type { Request, Response } from "express";
-import { todoRepository } from "../repositories/todos.repository.js";
+
 import { todoService } from "../service/todos.service.js";
 
 
-// Normalizes frontend strings to match Prisma's Title Case enums
-// e.g. "high" → "High", "in_progress" → "In_Progress"
+
 const capitalize = (value: string | undefined): string | undefined => {
   if (!value) return undefined;
   return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 };
+
+// Status has irregular casing (ToDo, In_Progress) so we use an explicit map
+// Accepts any variant the frontend might send
+const normalizeStatus = (value: string | undefined): string | undefined => {
+  if (!value) return undefined;
+  const lookup: Record<string, string> = {
+    todo:        "ToDo",
+    ToDo:        "ToDo",
+    in_progress: "In_Progress",
+    inprogress:  "In_Progress",
+    "in progress": "In_Progress",
+    In_Progress: "In_Progress",
+    done:        "Done",
+    Done:        "Done",
+  };
+  return lookup[value] ?? value; // fallback: pass through as-is
+};
+
+// Converts Prisma enum keys back to human-readable values for API responses
+// e.g. "In_Progress" → "In Progress"
+const serializeTodo = (todo: Record<string, unknown>) => ({
+  ...todo,
+  status: todo.status === "In_Progress" ? "In Progress" : todo.status,
+});
 
 export const todoController = {
   getTodos: async (req: Request, res: Response): Promise<void> => {
@@ -23,6 +46,7 @@ export const todoController = {
       const order = (req.query.orderBy as string) === "asc" ? "asc" : "desc";
 
       const category = req.query.category as string;
+      const search = req.query.search as string | undefined;
 
       const result = await todoService.getTodos({
         userId: BigInt(userId),
@@ -31,11 +55,12 @@ export const todoController = {
         sortBy,
         order,
         category,
+        ...(search !== undefined && { search }),
       });
 
       res.status(200).json({
         message: "Successfully get all todos",
-        data: result.data,
+        data: result.data.map(serializeTodo),
         meta: {
           totalItems: result.totalItems,
           itemCount: result.data.length,
@@ -65,7 +90,7 @@ export const todoController = {
       const newTodo = await todoService.createTodo(userId, todoData);
       res.status(200).json({
         message: "todo berhasil di buat",
-        data: newTodo,
+        data: serializeTodo(newTodo as Record<string, unknown>),
       });
     } catch (error) {
       console.error(error);
@@ -83,7 +108,7 @@ export const todoController = {
         ...req.body,
         ...(req.body.priority && { priority: capitalize(req.body.priority) }),
         ...(req.body.category && { category: capitalize(req.body.category) }),
-        ...(req.body.status   && { status:   capitalize(req.body.status) }),
+        ...(req.body.status   && { status:   normalizeStatus(req.body.status) }),
       };
 
       if (isNaN(todoId)) {
@@ -101,7 +126,7 @@ export const todoController = {
 
       res.status(200).json({
         message: "update berhasil",
-        data: updatedTodo,
+        data: serializeTodo(updatedTodo as Record<string, unknown>),
       });
     } catch (error) {
       console.error(error);
@@ -126,7 +151,7 @@ export const todoController = {
         const deletedTodo = await todoService.deleteTodo(todoId);
         res.status(200).json({
             message: "delete berhasil",
-            data: deletedTodo
+            data: serializeTodo(deletedTodo as Record<string, unknown>),
         })
     } catch (error) {
         console.error(error);

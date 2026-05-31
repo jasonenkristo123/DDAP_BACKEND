@@ -20,7 +20,7 @@ model achievements {
 model templates {
   id_template BigInt    @id @default(autoincrement())
   title       String    @db.VarChar(100)
-  description String    @db.VarChar(100)
+  description String
   category    category
   due_days    Int
   created_at  DateTime? @db.Timestamp(6)
@@ -32,7 +32,7 @@ model todos {
   id_todo     BigInt    @id @default(autoincrement())
   id_user     BigInt?
   title       String    @db.VarChar(100)
-  description String?   @db.VarChar(100)
+  description String?
   priority    priority
   category    category
   status      status?   @default(ToDo)

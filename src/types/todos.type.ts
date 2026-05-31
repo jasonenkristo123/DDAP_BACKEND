@@ -7,6 +7,7 @@ export interface GetTodosParams {
   sortBy: "created_at" | "priority";
   order: "asc" | "desc";
   category?: string;
+  search?: string;
 }
 
 export interface CreateTodoDTO {
