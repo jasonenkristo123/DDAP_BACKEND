@@ -4,7 +4,9 @@ import type { Request, Response } from "express"
 export const achievementController = {
     getAllAchievements: async (req: Request, res: Response) => {
         try {
-            const data = await achievementService.getAllAchievements();
+            const userId = 1;
+
+            const data = await achievementService.getAchievementsWithUserStatus(userId);
 
             res.status(200).json({
                 message: 'Success',
