@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,19 +7,86 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum TodoStatus {
-  TODO
-  IN_PROGRESS
-  DONE
+model achievements {
+  id_achievement    BigInt              @id @default(autoincrement())
+  title             String?             @db.VarChar(100)
+  description       String?             @db.VarChar(100)
+  difficulty        difficulty?
+  icon_url          String?
+  created_at        DateTime?           @db.Timestamp(6)
+  users_achievement users_achievement[]
 }
 
-model Todo {
-  id          String  @id @default(uuid())
-  title       String
-  description String?
+model templates {
+  id_template BigInt    @id @default(autoincrement())
+  title       String    @db.VarChar(100)
+  description String    @db.VarChar(100)
+  category    category
+  due_days    Int
+  created_at  DateTime? @db.Timestamp(6)
+  updated_at  DateTime? @db.Timestamp(6)
+}
 
-  status TodoStatus @default(TODO)
+model todos {
+  id_todo     BigInt    @id @default(autoincrement())
+  id_user     BigInt?
+  title       String    @db.VarChar(100)
+  description String?   @db.VarChar(100)
+  priority    priority
+  category    category
+  status      status?   @default(ToDo)
+  created_at  DateTime? @db.Timestamp(6)
+  done_at     DateTime? @db.Timestamp(6)
+  users       users?    @relation(fields: [id_user], references: [id_user], onDelete: NoAction, onUpdate: NoAction)
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model users {
+  id_user           BigInt              @id @default(autoincrement())
+  profilePhotoUrl   String?             @map("profile_photo")  @default("https://wallpapersok.com/images/thumbnail/cute-cat-eyes-profile-picture-uq3edzmg1guze2hh.webp")
+  displayName       String              @map("display_name") @db.VarChar(50)
+  username          String              @map("username") @unique @db.VarChar(50)
+  pronouns          String?             @map("pronouns") @db.VarChar(20)
+  bio               String?             @map("bio") @db.VarChar(100)
+  email             String?             @map("email") @db.VarChar(40)
+  instagram         String?             @map("instagram") @db.VarChar(40)
+  linkedin          String?             @map("linkedin") @db.VarChar(40)
+  created_at        DateTime?           @db.Timestamp(6)
+  updated_at        DateTime?           @db.Timestamp(6)
+  todos             todos[]
+  users_achievement users_achievement[]
+}
+
+model users_achievement {
+  id             BigInt        @id @default(autoincrement())
+  id_user        BigInt?
+  id_achievement BigInt?
+  completed_at   DateTime?     @db.Timestamp(6)
+  achievements   achievements? @relation(fields: [id_achievement], references: [id_achievement], onDelete: NoAction, onUpdate: NoAction)
+  users          users?        @relation(fields: [id_user], references: [id_user], onDelete: NoAction, onUpdate: NoAction)
+}
+
+
+enum category {
+  College
+  Productivity
+  Work
+  Personal
+}
+
+enum difficulty {
+  Hard
+  Medium
+  Easy
+}
+
+enum priority {
+  High
+  Medium
+  Low
+}
+
+enum status {
+  ToDo
+  In_Progress @map("In Progress")
+  Done
 }
