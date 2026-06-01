@@ -1,9 +1,10 @@
 import { prismaClient } from "../lib/prisma.js";
 import { achievementRepository } from "../repositories/achievements.repository.js";
+import type { GetAchievementsParams } from "../repositories/achievements.repository.js";
 
 export const achievementService = {
-  getAllAchievements: async () => {
-    return await achievementRepository.getAllAchievements();
+  getAllAchievements: async (params?: GetAchievementsParams) => {
+    return await achievementRepository.getAllAchievements(params);
   },
 
   getUserAchievements: async (userId: number) => {
@@ -39,8 +40,8 @@ export const achievementService = {
     }
   },
 
-  getAchievementsWithUserStatus: async (userId: number) => {
-    const allAchievements = await achievementRepository.getAllAchievements();
+  getAchievementsWithUserStatus: async (userId: number, params?: GetAchievementsParams) => {
+    const allAchievements = await achievementRepository.getAllAchievements(params);
 
     const userUnlocked =
       await achievementRepository.getUserAchievements(userId);
