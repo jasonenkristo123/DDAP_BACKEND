@@ -96,6 +96,7 @@ export const todoController = {
       console.error(error);
       res.status(500).json({
         message: "gagal membuat todos",
+        error: (error as Error).message,
       });
     }
   },
