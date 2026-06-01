@@ -10,7 +10,7 @@ import templateRoutes from "./routes/templates.routes.js";
 import achievementsRoutes from "./routes/achievements.routes.js";
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
