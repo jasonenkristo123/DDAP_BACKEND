@@ -72,6 +72,8 @@ enum category {
   Productivity
   Work
   Personal
+  Study
+  Urgent
 }
 
 enum difficulty {
